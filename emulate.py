@@ -108,7 +108,7 @@ def emulate(code, debug=True):
         if debug:
             print(f"\tAccumulator: {acc_old} -> {ac}\n\tMDR {mdr_old} -> {mdr}\n\tMAR {mar_old} -> {mar}")
             mem = code[code.index("end")+1:]
-            print("MEM:", mem, end="\n\n")
+            print("\tMEM:", mem, end="\n\n")
 
         pc += 1
 #emulate(code)
