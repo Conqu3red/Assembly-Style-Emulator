@@ -12,4 +12,4 @@ end
 0
 0
 """
-emulate(code, False)
+emulate(code, True)
