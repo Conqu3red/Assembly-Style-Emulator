@@ -1,3 +1,4 @@
+import re
 '''
 language: kinda assembly except a bit different because I don't know assembly
 
@@ -55,6 +56,50 @@ pc = 0
 cir = 0
 
 
+def compile_code(code):
+    print("[#] Compiling...")
+    code = code.split("\n") # split into commands
+    code = [i for i in code if i] # remove blank lines
+    new_code = []
+
+    # remove comments
+    for c, line in enumerate(code):
+        clean = line
+        clean = clean.split("#")[0].strip()
+        new_code.append(clean)
+    code = new_code
+    
+    
+    variables = code[code.index("end")+1:]
+    # replace variable names
+    
+    for index, var in enumerate(variables):
+        
+        name, value = var.split(":")
+        #print(index, name, value)
+        code = "\n".join(code)
+        code = code.replace(name, str(index))
+        code = code.replace(f"{index}:", "")
+        code = code.split("\n")
+    
+    new_code = []
+    # handle goto pointes of the form :pointer:
+    pointers = re.findall(r":\w+:", "\n".join(code))
+    pointers = list(dict.fromkeys(pointers)) # remove duplicates
+    for pointer in pointers:
+        pointer_addr = [c for c,p in enumerate(code) if p == pointer][0]
+        code[pointer_addr] = f"#{pointer}"
+        code = "\n".join(code).replace(pointer, str(pointer_addr))
+        code = code.split("\n")
+    
+    print("[#] Code Compiled!")
+    #print("\n".join(code))
+    return "\n".join(code)
+
+
+
+
+
 
 
 def emulate(code, debug=True):
@@ -72,12 +117,16 @@ def emulate(code, debug=True):
         mar = pc
         cmd = instruction.split(" ")
         offset = code.index("end")+1
+        # note data adresses start at 0 from "end" onwards. goto uses the true addr
+        # so the first command is addr 0
         #print(instruction + ": Accumulator", ac, "MDR", mdr, "MAR", mar)
         if debug:
             print(f"\t[{instruction}]")
         if cmd[0] == "load": # load [addr]
             ac = int(code[int(cmd[1])+offset])
             mdr = ac
+        
+        
         if cmd[0] == "add": # add [addr]
             mdr = int(code[int(cmd[1])+offset])
             ac += mdr
@@ -90,19 +139,48 @@ def emulate(code, debug=True):
         if cmd[0] == "div": # div [addr]
             mdr = int(code[int(cmd[1])+offset])
             ac /= mdr
+        if cmd[0] == "pow": # pow [addr]
+            mdr = int(code[int(cmd[1])+offset])
+            ac **= mdr
+        
+        
+        
         if cmd[0] == "out": # out
             print(ac)
         if cmd[0] == "inp": # inp
             ac = int(input())
+        
+        
         if cmd[0] == "store": # store [addr]
             # stores accumulator value in specified adress
             code[int(cmd[1])+offset] = ac
 
-        if cmd[0] == "goto": # goto [addr]
-            pc = int(cmd[1])
+        if cmd[0] == "goto": # goto [addr] []
+            pc = int(cmd[1])-1
+        if cmd[0] == "halt":
+            break
         
         if cmd[0] == "eq": # eq [addr]
             ac = int(ac == int(code[int(cmd[1])+offset]))
+
+
+        # eq ==
+        # neq !=
+        # les <
+        # leq <=
+        # gre >
+        # geq >=
+
+        if cmd[0] == "if":
+            if (
+                ((ac == int(code[int(cmd[2])+offset])) if cmd[1] == "==" else False)
+                or ((ac != int(code[int(cmd[2])+offset])) if cmd[1] == "!=" else False)
+                or ((ac < int(code[int(cmd[2])+offset])) if cmd[1] == "<" else False)
+                or ((ac <= int(code[int(cmd[2])+offset])) if cmd[1] == "<=" else False)
+                or ((ac > int(code[int(cmd[2])+offset])) if cmd[1] == ">" else False)
+                or ((ac >= int(code[int(cmd[2])+offset])) if cmd[1] == ">=" else False)
+            ):
+                pc = int(cmd[4])-1
 
 
         if debug:
