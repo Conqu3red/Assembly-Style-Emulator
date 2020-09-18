@@ -2,6 +2,7 @@ from emulate import emulate, compile_code
 # figure out a way to implement if statements
 # maybe: if == [addr] goto [addr]
 #       [   if statement   ]   [other command] 
+# The following code outputs the squares of number 1-10
 code = """
 :loop:
 load var # this is a comment
