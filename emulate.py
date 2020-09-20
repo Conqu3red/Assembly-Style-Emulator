@@ -56,10 +56,7 @@ pc = 0
 cir = 0
 
 
-def compile_code(code):
-    # ISSUE: Variable naes can get overwritten for example if you had
-    # var_a:0 and var_b:0
-    # 0 and 0_b <-- replaces middles of other variables = BAD
+def compile_code(code, display_result=False):
     print("[#] Compiling...")
     code = code.split("\n") # split into commands
     code = [i for i in code if i] # remove blank lines
@@ -81,8 +78,9 @@ def compile_code(code):
         name, value = var.split(":")
         #print(index, name, value)
         code = "\n".join(code)
-        code = code.replace(name, str(index))
-        code = code.replace(f"{index}:", "")
+        code = code.replace(f"{name}\n", f"{str(index)}\n")
+        code = code.replace(f"{name} ", f"{str(index)} ")
+        code = code.replace(f"{name}:", "")
         code = code.split("\n")
     
     new_code = []
@@ -97,6 +95,8 @@ def compile_code(code):
     
     print("[#] Code Compiled!")
     #print("\n".join(code))
+    if display_result:
+        print("\n".join(code))
     return "\n".join(code)
 
 
