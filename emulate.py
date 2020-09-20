@@ -57,6 +57,9 @@ cir = 0
 
 
 def compile_code(code):
+    # ISSUE: Variable naes can get overwritten for example if you had
+    # var_a:0 and var_b:0
+    # 0 and 0_b <-- replaces middles of other variables = BAD
     print("[#] Compiling...")
     code = code.split("\n") # split into commands
     code = [i for i in code if i] # remove blank lines
@@ -142,6 +145,9 @@ def emulate(code, debug=True):
         if cmd[0] == "pow": # pow [addr]
             mdr = int(code[int(cmd[1])+offset])
             ac **= mdr
+        if cmd[0] == "mod": # pow [addr]
+            mdr = int(code[int(cmd[1])+offset])
+            ac %= mdr
         
         
         
