@@ -38,7 +38,7 @@ load 0 # load var 0
 add 1 # add var 1 (15)
 store 0 # store in var 0
 out # output ac
-end # end of codew
+end # end of code
 10 # var 0
 15 # var 1
 '''
@@ -79,8 +79,8 @@ def compile_code(code, display_result=False):
             name, value = var.split(":")
             #print(index, name, value)
             code = "\n".join(code)
-            code = code.replace(f"{name}\n", f"{str(index)}\n")
-            code = code.replace(f"{name} ", f"{str(index)} ")
+            code = code.replace(f" {name}\n", f" {str(index)}\n")
+            code = code.replace(f" {name} ", f" {str(index)} ")
             code = code.replace(f"{name}:", "")
             code = code.split("\n")
 

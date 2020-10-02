@@ -1,56 +1,14 @@
 import PySimpleGUI as sg
 import emulate
+import os
 
 import tkinter as tk
 from tkinter import filedialog
-examples = {
-	"Primes":""":start:
-load one 
-store md # set md to 1
-load count
-add inc # inccrement count (current number)
-store count
-if > lim goto :end: # if past limit end program
-
-
-:check_prime: # looped to check if prime
-load md
-add inc # increment mod value
-store md
-if == count goto :prime: # if found no factors: print number
-
-load md
-
-
-load count
-mod md # modulo
-if == zero goto :start: # if a factor was found, the number isn't prime: go to next number
-
-
-load md
-if < count goto :check_prime: # if not checked all possible factors then check next one
-
-:prime:
-load count
-out # if prime: output number and go to next number if not at limit
-if < lim goto :start:
-
-:end:
-end
-count:1
-inc:1
-lim:100
-md:1
-zero:0
-one:1"""
-}
 
 
 
 
-
-
-
+sg.theme('SystemDefaultForReal')   # Add a touch of color
 
 code_frame = [
 				  [sg.Multiline(size=(30, 15), key='input', change_submits=True)]
@@ -65,12 +23,18 @@ output_frame = [
 menu_def = [['File', ['Open', 'Save', 'Exit', 'Properties']],            
             ['Help', 'About'], ]
 
-sg.theme('SystemDefaultForReal')   # Add a touch of color
+prog_input_frame = [[sg.Input(disabled=True,size=(30, 1),background_color="light green", key="program_input"), sg.Button("Send Input", disabled=True)]]
+inp = sg.Frame("Input", prog_input_frame, pad=(250,0),font="Helvetica 12")
+
+examples = ["Choose an Example program"] + os.listdir("examples")
+
+
 # All the stuff inside your window.
 layout = [  [sg.Menu(menu_def)],
 			[sg.Text('Assembly Style Emulator', font='Helvetica 25')],
-			[sg.Frame('Code', code_frame, font='Helvetica 12'), sg.Frame('Compiled Code', compiled_frame, font='Helvetica 12'), sg.Column([[sg.Input(disabled=True,size=(30, 1),background_color="light green", key="program_input"), sg.Button("Send Input", disabled=True)],[sg.Frame('Output', output_frame, font='Helvetica 12')]])],
-			[sg.Button('Emulate'), sg.Combo(["Choose an Example program","Primes"], default_value="None", key="load_example", readonly=True, change_submits=True)],
+			[],
+			[sg.Frame('Code', code_frame, font='Helvetica 12'), sg.Frame('Compiled Code', compiled_frame, font='Helvetica 12'), sg.Column([[sg.Frame('Output', output_frame, font='Helvetica 12')]])],
+			[sg.Button('Emulate'), sg.Combo(examples,tooltip="Choose an example program to load", default_value="Choose an Example program", key="load_example", readonly=True, change_submits=True),sg.Button("", visible=False,size=(30,1)), inp],
 			[sg.Checkbox("Debug", key="show_debug"),sg.Checkbox("Live Compile", key="live_compile")]]
 
 
@@ -134,7 +98,9 @@ while True:
 	if event == "load_example":
 		example = window.Element("load_example").get()
 		if example != "Choose an Example program":
-			window.Element("input").update(value=examples[example])
+			with open(f"examples/{example}", "r") as f:
+				program = f.read()
+			window.Element("input").update(value=program)
 	
 	if event == "Emulate":
 		window.Element("compiled").update(background_color="white")
@@ -237,7 +203,7 @@ while True:
 					if debug:
 						window.Element("output").update(value=f"\tAC: {acc_old} -> {ac}\n\tMDR {mdr_old} -> {mdr}\n\tMAR {mar_old} -> {mar}\n", append=True)
 						mem = code[code.index("end")+1:]
-						window.Element("output").update(value=f"\tMEM: {','.join(mem)}\n\n", append=True)
+						window.Element("output").update(value=f"\tMEM: {','.join([str(l) for l in mem])}\n\n", append=True)
 
 					pc += 1
 				except Exception as e:
